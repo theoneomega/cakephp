@@ -327,7 +327,7 @@ class Oracle extends DboSource {
      * @return integer Number of rows in resultset
      * @access public
      */
-    function lastNumRows() {
+    function lastNumRows($source = NULL) {
         return $this->_numRows;
     }
 
@@ -338,7 +338,7 @@ class Oracle extends DboSource {
      * @return resource Result resource identifier or null
      * @access protected
      */
-    function _execute($sql) {
+    function _execute($sql, $params = Array(), $prepareOptions = Array()) {
         $this->_statementId = @ociparse($this->connection, $sql);
         if (!$this->_statementId) {
             $this->_setError($this->connection);
@@ -385,7 +385,7 @@ class Oracle extends DboSource {
      * @return array
      * @access public
      */
-    function fetchRow() {
+    function fetchRow($sql = NULL) {
         if ($this->_currentRow >= $this->_numRows) {
             ocifreestatement($this->_statementId);
             $this->_map = null;
@@ -464,7 +464,7 @@ class Oracle extends DboSource {
      * @return array tablenames in the database
      * @access public
      */
-    function listSources() {
+    function listSources($data = NULL) {
         $cache = parent::listSources();
         if ($cache != null) {
             return $cache;
@@ -490,7 +490,7 @@ class Oracle extends DboSource {
      * @return array Fields in table. Keys are name and type
      * @access public
      */
-    public function describe(&$model) {
+    public function describe($model) {
         $table = $this->fullTableName($model, false);
 
         if (!empty($model->sequence)) {
@@ -899,7 +899,7 @@ class Oracle extends DboSource {
      * @return integer
      * @access public
      */
-    function lastInsertId($source) {
+    function lastInsertId($source = null) {
         $sequence = $this->_sequenceMap[$source];
         $sql = "SELECT $sequence.currval FROM dual";
 
@@ -919,7 +919,7 @@ class Oracle extends DboSource {
      * @return string Error message with error number
      * @access public
      */
-    function lastError() {
+    function lastError(PDOStatement $query = NULL) {
         return $this->_error;
     }
 
@@ -929,7 +929,7 @@ class Oracle extends DboSource {
      * @return int Number of affected rows
      * @access public
      */
-    function lastAffected() {
+    function lastAffected($source = NULL) {
         return $this->_statementId ? ocirowcount($this->_statementId) : false;
     }
 
@@ -993,7 +993,7 @@ class Oracle extends DboSource {
      * @param integer $recursive Number of levels of association
      * @param array $stack
      */
-    function queryAssociation(&$model, &$linkModel, $type, $association, $assocData, &$queryData, $external = false, &$resultSet, $recursive, $stack) {
+    function queryAssociation(Model $model, &$linkModel, $type, $association, $assocData, &$queryData, $external = false, &$resultSet, $recursive, $stack) {
         if ($query = $this->generateAssociationQuery($model, $linkModel, $type, $association, $assocData, $queryData, $external, $resultSet)) {
             if (!isset($resultSet) || !is_array($resultSet)) {
                 if (Configure::read() > 0) {
@@ -1144,7 +1144,7 @@ class Oracle extends DboSource {
      * 						Otherwise, all tables defined in the schema are generated.
      * @return string
      */
-    function dropSchema($schema, $table = null) {
+    function dropSchema(CakeSchema $schema, $table = null) {
         if (!is_a($schema, 'CakeSchema')) {
             trigger_error(__('Invalid schema object', true), E_USER_WARNING);
             return null;
@@ -1157,6 +1157,10 @@ class Oracle extends DboSource {
             }
         }
         return $out;
+    }
+
+    function hasResult() {
+        return true;
     }
 
 }

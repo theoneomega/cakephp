@@ -669,7 +669,7 @@ class DboSource extends DataSource {
 		if ($result = $this->execute($sql, array(), $params)) {
 			$out = array();
 
-			if ($this->hasResult()) {
+		if ($this->hasResult()) {
 				$first = $this->fetchRow();
 				if ($first) {
 					$out[] = $first;
